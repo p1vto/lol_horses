@@ -3,14 +3,16 @@ use util::client;
 mod util;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() {
     let (port, token) = get_port_and_token();
     let client = client::RequestClient::new(port, token);
 
     println!("press any key to query, press 'q' to quit.");
     loop {
         let mut input = String::new();
-        std::io::stdin().read_line(&mut input).expect("Failed to read input");
+        std::io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read input");
 
         match input.trim() {
             "q" => {
@@ -24,9 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
-    Ok(())
 }
-
 
 async fn analyse_horses(client: &client::RequestClient) {
     let conversation_id = client.get_chat_select_champ_id().await;
@@ -54,9 +54,8 @@ async fn analyse_horses(client: &client::RequestClient) {
                         }
                     }
                     // analyse_horses
-                    horses
-                    .sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
-                    
+                    horses.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+
                     println!("\n\n------------我方阵容组成---------------");
                     while let Some(horse) = horses.pop() {
                         if let Some(horse_type) = horse_types.pop() {
@@ -108,4 +107,3 @@ fn get_port_and_token() -> (String, String) {
 
     (String::from(port), String::from(token))
 }
-
