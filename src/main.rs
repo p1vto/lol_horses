@@ -1,10 +1,11 @@
 use std::process::Command;
+use sysinfo::{ProcessExt, System, SystemExt};
 use util::client;
 mod util;
 
 #[tokio::main]
 async fn main() {
-    let (port, token) = get_port_and_token();
+    let (port, token) = get_lol_config();
     let client = client::RequestClient::new(port, token);
 
     println!("press any key to query, press 'q' to quit.");
@@ -76,34 +77,26 @@ async fn analyse_horses(client: &client::RequestClient) {
     }
 }
 
-fn get_port_and_token() -> (String, String) {
-    let output = Command::new("cmd")
-        .args(&[
-            "/C",
-            "wmic PROCESS WHERE name='LeagueClientUx.exe' GET commandline",
-        ])
-        .output()
-        .expect("wmic PROCESS command failed to start");
-
-    let p_info = String::from_utf8_lossy(&output.stdout);
-    println!("stdout: {}", p_info);
-    let port = p_info
-        .split("--app-port=")
-        .last()
-        .expect("no app-port founded.")
-        .split("\"")
+fn get_lol_config() -> (String, String) {
+    let s = System::new_all();
+    let lolc = s
+        .processes_by_exact_name("LeagueClientUx.exe")
         .next()
-        .expect("no app-port founded.");
+        .expect("can't find process LeagueClientUx.exe");
 
-    let token = p_info
-        .split("--remoting-auth-token=")
-        .last()
-        .expect("no remoting-auth-token founded.")
-        .split("\"")
-        .next()
-        .expect("no remoting-auth-token founded.");
-
-    println!("process info found.\n port:{}\n token:{}", port, token);
-
-    (String::from(port), String::from(token))
+    let command_line = lolc.cmd();
+    if command_line.len() == 0 {
+        panic!("League of Legends client rcommand line is null.");
+    }
+    let mut remoting_app_port = String::new();
+    let mut auth_token = String::new();
+    for command in command_line {
+        if command.starts_with("--app-port=") {
+            remoting_app_port = command.replace("--app-port=", "")
+        } else if command.starts_with("--remoting-auth-token=") {
+            auth_token = command.replace("--remoting-auth-token=", "");
+        }
+    }
+    println!("port: {} token: {}", &remoting_app_port, &auth_token);
+    (remoting_app_port, auth_token)
 }
