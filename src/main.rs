@@ -1,4 +1,3 @@
-use std::process::Command;
 use sysinfo::{ProcessExt, System, SystemExt};
 use util::{client, model::GameQueryType};
 mod util;

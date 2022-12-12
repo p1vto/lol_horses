@@ -1,31 +1,34 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct GameMatchList {
-    pub accountId: usize,
-    pub platformId: String,
+    pub account_id: usize,
+    pub platform_id: String,
     pub games: GameMatch,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct GameMatch {
-    pub gameBeginDate: String,
-    pub gameCount: usize,
-    pub gameEndDate: String,
-    pub gameIndexBegin: usize,
-    pub gameIndexEnd: usize,
+    pub game_begin_date: String,
+    pub game_count: usize,
+    pub game_end_date: String,
+    pub game_index_begin: usize,
+    pub game_index_end: usize,
     pub games: Vec<Game>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct Game {
-    pub gameId: usize,
-    pub gameMode: String,
-    pub gameType: String,
-    pub gameVersion: String,
-    pub mapId: usize,
-    pub queueId: usize,
-    pub participantIdentities: Vec<ParticipantIdentity>,
+    pub game_id: usize,
+    pub game_mode: String,
+    pub game_type: String,
+    pub game_version: String,
+    pub map_id: usize,
+    pub queue_id: usize,
+    pub participant_identities: Vec<ParticipantIdentity>,
     pub participants: Vec<Participant>,
 }
 
@@ -58,57 +61,63 @@ impl GameQueryType {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ParticipantIdentity {
-    pub participantId: usize,
+    pub participant_id: usize,
     pub player: ParticipantPlayer,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ParticipantPlayer {
-    pub accountId: usize,
-    pub summonerId: usize,
-    pub summonerName: String,
+    pub account_id: usize,
+    pub summoner_id: usize,
+    pub summoner_name: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct Participant {
-    pub championId: usize,
-    pub highestAchievedSeasonTier: String,
-    pub participantId: usize,
+    pub champion_id: usize,
+    pub highest_achieved_season_tier: String,
+    pub participant_id: usize,
     pub stats: ParticipantStats,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ParticipantStats {
     pub assists: usize,
-    pub causedEarlySurrender: bool,
+    pub caused_early_surrender: bool,
     pub deaths: usize,
     pub kills: usize,
-    pub doubleKills: usize,
-    pub tripleKills: usize,
-    pub quadraKills: usize,
-    pub pentaKills: usize,
-    pub killingSprees: usize,
-    pub totalDamageDealtToChampions: usize,
-    pub firstBloodAssist: bool,
-    pub firstBloodKill: bool,
+    pub double_kills: usize,
+    pub triple_kills: usize,
+    pub quadra_kills: usize,
+    pub penta_kills: usize,
+    pub killing_sprees: usize,
+    pub total_damage_dealt_to_champions: usize,
+    pub first_blood_assist: bool,
+    pub first_blood_kill: bool,
     pub win: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct GameChatConversation {
     pub id: String,
     pub r#type: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct GameChatConversationMessage {
     pub body: String,
-    pub fromId: String,
-    pub fromPid: String,
-    pub fromSummonerId: usize,
+    pub from_id: String,
+    pub from_pid: String,
+    pub from_summoner_id: usize,
     pub id: String,
-    pub isHistorical: bool,
+    pub is_historical: bool,
     pub timestamp: String,
     pub r#type: String,
 }
@@ -116,13 +125,13 @@ pub struct GameChatConversationMessage {
 impl ParticipantStats {
     pub fn get_match_score(&self) -> usize {
         let mut score = 100;
-        if self.firstBloodKill {
+        if self.first_blood_kill {
             score += 10
         }
-        if self.firstBloodAssist {
+        if self.first_blood_assist {
             score += 5
         }
-        if self.causedEarlySurrender {
+        if self.caused_early_surrender {
             score -= 10
         }
         if self.win {
@@ -130,10 +139,10 @@ impl ParticipantStats {
         } else {
             score -= 5
         }
-        score += self.doubleKills * 2;
-        score += self.tripleKills * 5;
-        score += self.quadraKills * 10;
-        score += self.pentaKills * 15;
+        score += self.double_kills * 2;
+        score += self.triple_kills * 5;
+        score += self.quadra_kills * 10;
+        score += self.penta_kills * 15;
         score += self.assists;
         score += self.kills * 2;
         score -= self.deaths;
@@ -147,9 +156,9 @@ impl GameMatchList {
             .games
             .games
             .iter()
-            .map(|game| &game.participantIdentities)
+            .map(|game| &game.participant_identities)
             .filter_map(|participants| participants.iter().next())
-            .map(|p| &p.player.summonerName)
+            .map(|p| &p.player.summoner_name)
             .next()
             .expect("no summoner's name");
 
@@ -162,9 +171,9 @@ impl GameMatchList {
             .games
             .iter()
             .filter(|game| {
-                game.gameMode == game_query_type.get_game_mode()
-                    && game.gameType == game_query_type.get_game_type()
-                    && game.queueId == game_query_type.get_queue_id()
+                game.game_mode == game_query_type.get_game_mode()
+                    && game.game_type == game_query_type.get_game_type()
+                    && game.queue_id == game_query_type.get_queue_id()
             })
             .map(|game| &game.participants)
             .filter_map(|participants| participants.iter().next())

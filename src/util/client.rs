@@ -89,7 +89,7 @@ impl RequestClient {
                 {
                     Ok(parsed) => {
                         println!("Success! {:?}", parsed);
-                        let ids = parsed.iter().map(|msg| msg.fromId.clone()).collect();
+                        let ids = parsed.iter().map(|msg| msg.from_id.clone()).collect();
 
                         println!("All summoners' id queried.\n {:?}", &ids);
                         return Some(ids);
