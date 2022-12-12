@@ -1,6 +1,6 @@
 use std::process::Command;
 use sysinfo::{ProcessExt, System, SystemExt};
-use util::client;
+use util::{client, model::GameQueryType};
 mod util;
 
 #[tokio::main]
@@ -8,7 +8,9 @@ async fn main() {
     let (port, token) = get_lol_config();
     let client = client::RequestClient::new(port, token);
 
-    println!("press any key to query, press 'q' to quit.");
+    println!(
+        "press 'r' to query rank info\n press 'j' to query polar chaos info\n press 'q' to quit."
+    );
     loop {
         let mut input = String::new();
         std::io::stdin()
@@ -20,16 +22,27 @@ async fn main() {
                 std::process::exit(0);
             }
 
-            _ => {
-                analyse_horses(&client).await;
+            "r" => {
+                analyse_horses(&client, GameQueryType::Rank).await;
                 input.clear();
-                println!("press any key to query, press 'q' to quit.");
+                println!("press 'r' to query rank info\n press 'j' to query polar chaos info\n press 'q' to quit.");
+            }
+
+            "j" => {
+                analyse_horses(&client, GameQueryType::PolarChaos).await;
+                input.clear();
+                println!("press 'r' to query rank info\n press 'j' to query polar chaos info\n press 'q' to quit.");
+            }
+
+            _ => {
+                input.clear();
+                println!("press 'r' to query rank info\n press 'j' to query polar chaos info\n press 'q' to quit.");
             }
         }
     }
 }
 
-async fn analyse_horses(client: &client::RequestClient) {
+async fn analyse_horses(client: &client::RequestClient, game_query_type: GameQueryType) {
     let conversation_id = client.get_chat_select_champ_id().await;
     match conversation_id {
         Some(conversation_id) => {
@@ -44,8 +57,9 @@ async fn analyse_horses(client: &client::RequestClient) {
                         match match_list {
                             Some(match_list) => {
                                 let summoner = match_list.get_summoner_name();
-                                let avg_score = match_list.get_recently_rank_average_score();
-                                println!("马匹{}近期排位表现平均得分{}", summoner, avg_score);
+                                let avg_score =
+                                    match_list.get_recently_rank_average_score(&game_query_type);
+                                println!("马匹{}近期表现平均得分{}", summoner, avg_score);
                                 horses.push((summoner.to_owned(), avg_score));
                             }
 
@@ -60,7 +74,7 @@ async fn analyse_horses(client: &client::RequestClient) {
                     println!("\n\n------------我方阵容组成---------------");
                     while let Some(horse) = horses.pop() {
                         if let Some(horse_type) = horse_types.pop() {
-                            println!("{} {} 近期排位表现平均得分{}", horse_type, horse.0, horse.1);
+                            println!("{} {} 近期表现平均得分{}", horse_type, horse.0, horse.1);
                         }
                     }
                 }
