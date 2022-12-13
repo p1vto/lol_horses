@@ -1,15 +1,20 @@
+use iced::{Alignment, Element, Sandbox, Settings};
 use sysinfo::{ProcessExt, System, SystemExt};
+use ui::content_view;
 use util::{client, model::GameQueryType};
+mod ui;
 mod util;
 
 #[tokio::main]
 async fn main() {
+    content_view::ContentView::run(Settings::default());
     let (port, token) = get_lol_config();
     let client = client::RequestClient::new(port, token);
 
     println!(
         "press 'r' to query rank info\n press 'j' to query polar chaos info\n press 'q' to quit."
     );
+
     loop {
         let mut input = String::new();
         std::io::stdin()

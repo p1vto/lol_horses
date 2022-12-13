@@ -12,3 +12,4 @@ wmi = "0.11"
 serde = "1.0"
 base64 = "0.13.0"
 sysinfo = "0.27.0"
+iced = { version = "0.6.0", features = ["tokio"] }
